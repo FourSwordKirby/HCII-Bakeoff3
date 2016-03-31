@@ -186,7 +186,7 @@ public boolean checkForSuccess()
     boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
 	boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"	
 	println("Close Enough Distance: " + closeDist);
-	println("Close Enough Rotation: " + closeRotation + " ("+(t.rotation+360)%90+","+ (screenRotation+360)%90+")");
+    println("Close Enough Rotation: " + closeRotation + "(dist="+calculateDifferenceBetweenAngles(t.rotation,screenRotation)+")");
 	println("Close Enough Z: " + closeZ);
 	
 	return closeDist && closeRotation && closeZ;	
@@ -194,11 +194,10 @@ public boolean checkForSuccess()
 
 double calculateDifferenceBetweenAngles(float a1, float a2)
   {
-      a1+=360;
-      a2+=360; 
-      
-      if (abs(a1-a2)>45)
-        return abs(abs(a1-a2)%90-90);
+     double diff=abs(a1-a2);
+      diff%=90;
+      if (diff>45)
+        return 90-diff;
       else
-        return abs(a1-a2)%90;
+        return diff;
  }
