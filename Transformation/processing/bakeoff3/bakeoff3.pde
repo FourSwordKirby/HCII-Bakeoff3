@@ -20,6 +20,19 @@ boolean userDone = false;
 final int screenPPI = 120; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
+//Transformation params
+float padding = 10f;
+float dotRadius = 2f;
+PVector oldDirection = new PVector();
+boolean inRotationAction = false;
+boolean inMoveAction = false;
+boolean mouseInArea = false;
+float additionalRotation = 0f;
+float newScale = 1f;
+float oldMouseX = 0f;
+float oldMouseY = 0f;
+PVector additionalMove = new PVector(); 
+
 private class Target
 {
   float x = 0;
@@ -84,14 +97,19 @@ void draw() {
 
   Target t = targets.get(trialIndex);
 
+  float scaledZ = t.z * newScale; //scaled square width
 
   translate(t.x, t.y); //center the drawing coordinates to the center of the screen
   translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
+  translate(additionalMove.x, additionalMove.y);
+  
+  rotate(radians(t.rotation + additionalRotation));
 
-  rotate(radians(t.rotation));
-
-  colorSquare(Square.TARGET);
-  rect(0, 0, t.z, t.z);
+  fill(255, 0, 0); //set color to semi translucent
+  rect(0, 0, scaledZ, scaledZ); //draw scaled square instead
+  
+  //==========DRAW TRANSFORMATION BOUNDARY==========
+  DrawTransformationBoundary(t);
 
   popMatrix();
 
@@ -103,39 +121,85 @@ void draw() {
   //custom shifts:
   //translate(screenTransX,screenTransY); //center the drawing coordinates to the center of the screen
 
-  colorSquare(Square.TARGETTING);
+  fill(255, 128); //set color to semi translucent
   rect(0, 0, screenZ, screenZ);
 
   popMatrix();
 
-  scaffoldControlLogic(); //you are going to want to replace this!
+  //scaffoldControlLogic(); //you are going to want to replace this!
 
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.5f));
 }
 
-enum Square{TARGET, TARGETTING};
-
-void colorSquare(Square square)
+void DrawTransformationBoundary(Target t)
 {
-  if(square == Square.TARGET)
-  {
-    fill(255, 0, 0); //set color to semi translucent
-    if(checkForSuccess())
-    {
-      fill(0, 255, 0); ;
+  float scaledZ = t.z * newScale;
+  // 4 dots
+  PVector d1 = transform(-scaledZ/2f-20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d2 = transform(scaledZ/2f+20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d3 = transform(-scaledZ/2f-20, scaledZ/2f+20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d4 = transform(scaledZ/2f+20, scaledZ/2f+20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector center = new PVector(t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y);
+  
+  mouseInArea = // mouse in rotating area
+  dist(mouseX, mouseY, d1.x, d1.y) < 10 ||
+  dist(mouseX, mouseY, d2.x, d2.y) < 10 ||
+  dist(mouseX, mouseY, d3.x, d3.y) < 10 ||
+  dist(mouseX, mouseY, d4.x, d4.y) < 10;
+  if(mouseInArea) {
+    fill(255,255,0);
+    if(mousePressed){
+      if(!inRotationAction) {
+        inRotationAction = true;
+        oldDirection.x = mouseX - center.x;
+        oldDirection.y = mouseY - center.y;
+      }
     }
   }
-  if(square == Square.TARGETTING)
-  {
-    fill(255, 128); //set color to semi translucent
-    if(checkForSuccess())
-    {
-      fill(0, 255, 0); ;
+  else {
+    if(mousePressed) {
+      if(!inMoveAction) {
+        inMoveAction = true;
+        oldMouseX = mouseX;
+        oldMouseY = mouseY;
+      }
     }
+    fill(100,100,255,128);
   }
+  
+  if(inRotationAction) {
+    PVector mpos = new PVector(mouseX - center.x, mouseY - center.y);
+    additionalRotation = degrees(mpos.heading() - oldDirection.heading());
+    newScale = mpos.mag() / oldDirection.mag();
+  }
+  else if(inMoveAction){ // move
+    additionalMove.x = mouseX - oldMouseX;
+    additionalMove.y = mouseY - oldMouseY;
+  }
+  
+  stroke(128);
+  line(-scaledZ/2f-20, -scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20);
+  line(scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20, scaledZ/2f+20);
+  line(scaledZ/2f+20, scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20);
+  line(-scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20, -scaledZ/2f-20);
+  noStroke();
+  
+  ellipse(-scaledZ/2f-20, -scaledZ/2f-20, 20, 20);
+  ellipse(scaledZ/2f+20, -scaledZ/2f-20, 20, 20);
+  ellipse(-scaledZ/2f-20, scaledZ/2f+20, 20, 20);
+  ellipse(scaledZ/2f+20, scaledZ/2f+20, 20, 20);
 }
 
-void scaffoldControlLogic()
+// Calculate the transformed vector
+PVector transform(float ox, float oy, float x, float y, float d){
+  PVector v = new PVector();
+  float r = radians(d);
+  v.x = x + ox * cos(r) - oy * sin(r);
+  v.y = y + ox * sin(r) + oy * cos(r);
+  return v;
+}
+
+/*void scaffoldControlLogic()
 {
   //upper left corner, rotate counterclockwise
   text("CCW", inchesToPixels(.2f), inchesToPixels(.2f));
@@ -177,12 +241,12 @@ void scaffoldControlLogic()
   if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchesToPixels(.5f))
     screenTransY+=inchesToPixels(.02f);
   ;
-}
+}*/
 
 void mouseReleased()
 {
   //check to see if user clicked middle of screen
-  if (dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(.5f))
+  if (!inRotationAction && dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(.5f))
   {
     if (userDone==false && !checkForSuccess())
       errorCount++;
@@ -198,6 +262,26 @@ void mouseReleased()
       userDone = true;
       finishTime = millis();
     }
+  }
+  
+  // for transformation
+  if(inRotationAction) {
+    inRotationAction = false;
+    oldDirection.x = 0;
+    oldDirection.y = 0;
+    targets.get(trialIndex).rotation += additionalRotation;
+    targets.get(trialIndex).z *= newScale;
+    additionalRotation = 0;
+    newScale = 1;
+  }
+  if(inMoveAction) {
+    inMoveAction = false;
+    oldMouseX = 0f;
+    oldMouseY = 0f;
+    targets.get(trialIndex).x += additionalMove.x;
+    targets.get(trialIndex).y += additionalMove.y;
+    additionalMove.x = 0f;
+    additionalMove.y = 0f;
   }
 }
 
