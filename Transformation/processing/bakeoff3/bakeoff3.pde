@@ -110,6 +110,8 @@ void draw() {
   
   //==========DRAW TRANSFORMATION BOUNDARY==========
   DrawTransformationBoundary(t);
+  // draw center cross
+  DrawCenterCross(5);
 
   popMatrix();
 
@@ -123,6 +125,9 @@ void draw() {
 
   fill(255, 128); //set color to semi translucent
   rect(0, 0, screenZ, screenZ);
+  
+  // draw center cross
+  DrawCenterCross(5);
 
   popMatrix();
 
@@ -177,12 +182,12 @@ void DrawTransformationBoundary(Target t)
     additionalMove.y = mouseY - oldMouseY;
   }
   
-  stroke(128);
+  /*stroke(128);
   line(-scaledZ/2f-20, -scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20);
   line(scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20, scaledZ/2f+20);
   line(scaledZ/2f+20, scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20);
   line(-scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20, -scaledZ/2f-20);
-  noStroke();
+  noStroke();*/
   
   ellipse(-scaledZ/2f-20, -scaledZ/2f-20, 20, 20);
   ellipse(scaledZ/2f+20, -scaledZ/2f-20, 20, 20);
@@ -191,12 +196,21 @@ void DrawTransformationBoundary(Target t)
 }
 
 // Calculate the transformed vector
-PVector transform(float ox, float oy, float x, float y, float d){
+PVector transform(float ox, float oy, float x, float y, float d)
+{
   PVector v = new PVector();
   float r = radians(d);
   v.x = x + ox * cos(r) - oy * sin(r);
   v.y = y + ox * sin(r) + oy * cos(r);
   return v;
+}
+
+void DrawCenterCross(float size)
+{
+  stroke(255);
+  line(-size, 0, size, 0);
+  line(0, -size, 0, size);
+  noStroke();
 }
 
 /*void scaffoldControlLogic()
