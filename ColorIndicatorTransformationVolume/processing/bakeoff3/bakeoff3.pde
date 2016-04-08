@@ -8,7 +8,7 @@ int index = 0;
 float screenTransX = 0;
 float screenTransY = 0;
 float screenRotation = 0;
-float screenZ = 50f;
+float screenZ = 100f;
 
 int trialCount = 20; //this will be set higher for the bakeoff
 float border = 0; //have some padding from the sides
@@ -18,7 +18,7 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
-final int screenPPI = 120; //what is the DPI of the screen you are using
+final int screenPPI = 445; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 //Transformation params
@@ -51,7 +51,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(400, 700); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(890, 1557); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -140,18 +140,20 @@ void draw() {
 void DrawTransformationBoundary(Target t)
 {
   float scaledZ = t.z * newScale;
+  float dotDist = scaledZ/2f+inchesToPixels(.2f);
+  float dotSize = inchesToPixels(.15f);
   // 4 dots
-  PVector d1 = transform(-scaledZ/2f-20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
-  PVector d2 = transform(scaledZ/2f+20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
-  PVector d3 = transform(-scaledZ/2f-20, scaledZ/2f+20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
-  PVector d4 = transform(scaledZ/2f+20, scaledZ/2f+20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d1 = transform(-dotDist, -dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d2 = transform(dotDist, -dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d3 = transform(-dotDist, dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
+  PVector d4 = transform(dotDist, dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
   PVector center = new PVector(t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y);
   
   mouseInArea = // mouse in rotating area
-  dist(mouseX, mouseY, d1.x, d1.y) < 10 ||
-  dist(mouseX, mouseY, d2.x, d2.y) < 10 ||
-  dist(mouseX, mouseY, d3.x, d3.y) < 10 ||
-  dist(mouseX, mouseY, d4.x, d4.y) < 10;
+  dist(mouseX, mouseY, d1.x, d1.y) < dotSize/2f ||
+  dist(mouseX, mouseY, d2.x, d2.y) < dotSize/2f ||
+  dist(mouseX, mouseY, d3.x, d3.y) < dotSize/2f ||
+  dist(mouseX, mouseY, d4.x, d4.y) < dotSize/2f;
   if(mouseInArea) {
     fill(255,255,0);
     if(mousePressed){
@@ -184,16 +186,16 @@ void DrawTransformationBoundary(Target t)
   }
   
   /*stroke(128);
-  line(-scaledZ/2f-20, -scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20);
-  line(scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20, scaledZ/2f+20);
-  line(scaledZ/2f+20, scaledZ/2f+20, -scaledZ/2f-20, scaledZ/2f+20);
-  line(-scaledZ/2f-20, scaledZ/2f+20, -scaledZ/2f-20, -scaledZ/2f-20);
+  line(-dotDist, -dotDist, dotDist, -dotDist);
+  line(dotDist, -dotDist, dotDist, dotDist);
+  line(dotDist, dotDist, -dotDist, dotDist);
+  line(-dotDist, dotDist, -dotDist, -dotDist);
   noStroke();*/
   
-  ellipse(-scaledZ/2f-20, -scaledZ/2f-20, 20, 20);
-  ellipse(scaledZ/2f+20, -scaledZ/2f-20, 20, 20);
-  ellipse(-scaledZ/2f-20, scaledZ/2f+20, 20, 20);
-  ellipse(scaledZ/2f+20, scaledZ/2f+20, 20, 20);
+  ellipse(-dotDist, -dotDist, dotSize, dotSize);
+  ellipse(dotDist, -dotDist, dotSize, dotSize);
+  ellipse(-dotDist, dotDist, dotSize, dotSize);
+  ellipse(dotDist, dotDist, dotSize, dotSize);
 }
 
 //Calculate the transformed vector

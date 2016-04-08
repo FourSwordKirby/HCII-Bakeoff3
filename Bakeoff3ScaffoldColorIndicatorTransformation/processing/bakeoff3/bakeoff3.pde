@@ -17,7 +17,7 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
-final int screenPPI = 120; //what is the DPI of the screen you are using
+final int screenPPI = 445; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 //Transformation params
@@ -50,8 +50,8 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(400, 700); //set this, based on your sceen's PPI to be a 2x3.5" area.
-
+  size(890, 1557); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
   textAlign(CENTER);
@@ -139,6 +139,8 @@ void draw() {
 void DrawTransformationBoundary(Target t)
 {
   float scaledZ = t.z * newScale;
+  float dotDist = scaledZ/2f+inchesToPixels(0.2f);
+  float dotSize = inchesToPixels(0.15f)
   // 4 dots
   PVector d1 = transform(-scaledZ/2f-20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
   PVector d2 = transform(scaledZ/2f+20, -scaledZ/2f-20, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
