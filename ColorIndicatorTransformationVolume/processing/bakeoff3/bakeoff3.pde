@@ -106,8 +106,21 @@ void draw() {
 
   rotate(radians(t.rotation + additionalRotation));
 
+  // apply the translations to the square for checking
+  float oldZ = t.z;
+  t.z = scaledZ;
+  t.rotation += additionalRotation;
+  t.x += additionalMove.x;
+  t.y += additionalMove.y;
+  
   colorSquare(Square.TARGET);
-  rect(0, 0, scaledZ, scaledZ); 
+  rect(0, 0, scaledZ, scaledZ);
+  
+  // undo the translations
+  t.z = oldZ;
+  t.rotation -= additionalRotation;
+  t.x -= additionalMove.x;
+  t.y -= additionalMove.y;
   
   //==========DRAW TRANSFORMATION BOUNDARY==========
   DrawTransformationBoundary(t);//draw scaled square instead
@@ -124,8 +137,20 @@ void draw() {
   //custom shifts:
   //translate(screenTransX,screenTransY); //center the drawing coordinates to the center of the screen
 
+  // apply the translations to the square for checking
+  t.z = scaledZ;
+  t.rotation += additionalRotation;
+  t.x += additionalMove.x;
+  t.y += additionalMove.y;
+  
   colorSquare(Square.TARGETTING);
   rect(0, 0, screenZ, screenZ);
+  
+  // undo the translations
+  t.z = oldZ;
+  t.rotation -= additionalRotation;
+  t.x -= additionalMove.x;
+  t.y -= additionalMove.y;
   
   // draw center cross
   DrawCenterCross(5);
@@ -225,7 +250,7 @@ void colorSquare(Square square)
     fill(255, 0, 0); //set color to semi translucent
     if(checkForSuccess())
     {
-      fill(0, 255, 0); ;
+      fill(0, 255, 0);
     }
   }
   if(square == Square.TARGETTING)
@@ -233,7 +258,7 @@ void colorSquare(Square square)
     fill(255, 128); //set color to semi translucent
     if(checkForSuccess())
     {
-      fill(0, 255, 0); ;
+      fill(0, 255, 0);
     }
   }
 }
@@ -288,7 +313,7 @@ void keyPressed() {
   } 
   
   //Comment out this part when not using the android)
-  if ( (key == CODED) && (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN)) {
+  if ( (key == CODED) && (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN) && checkForSuccess()) {
     nextTrial();
     keyCode = 1;
   }
@@ -315,7 +340,7 @@ public void nextTrial()
 void mouseReleased()
 {
   //check to see if user clicked middle of screen
-  if (!inRotationAction && dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(.5f))
+  /*if (!inRotationAction && dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(.5f))
   {
     if (userDone==false && !checkForSuccess())
       errorCount++;
@@ -331,7 +356,7 @@ void mouseReleased()
       userDone = true;
       finishTime = millis();
     }
-  }
+  }*/
   
   // for transformation
   if(inRotationAction) {
