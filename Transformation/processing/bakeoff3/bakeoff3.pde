@@ -26,12 +26,14 @@ float dotRadius = 2f;
 PVector oldDirection = new PVector();
 boolean inRotationAction = false;
 boolean inMoveAction = false;
-boolean mouseInArea = false;
+boolean mouseOnDots = false;
+boolean mouseOnMoveArea = false;
 float additionalRotation = 0f;
 float newScale = 1f;
 float oldMouseX = 0f;
 float oldMouseY = 0f;
-PVector additionalMove = new PVector(); 
+PVector additionalMove = new PVector();
+boolean mouseDown = false;
 
 private class Target
 {
@@ -89,6 +91,20 @@ void draw() {
     text("User took " + (finishTime-startTime)/1000f/trialCount + " sec per target", width/2, inchesToPixels(.2f)*3);
 
     return;
+  }
+  else {
+    fill(255);
+    if(!inRotationAction && !inMoveAction && targets.get(trialIndex).z > 200) {
+      textAlign(RIGHT, BOTTOM);
+      text("Scale down", width, height);
+      fill(255,100);
+      rect(width-inchesToPixels(.4f), height-inchesToPixels(.1f), inchesToPixels(.8f), inchesToPixels(.2f));
+      if(!mouseDown && mousePressed && mouseX > width-inchesToPixels(.4f) && mouseY > height-inchesToPixels(.1f) && targets.get(trialIndex).z > 200) {
+        ScaleTarget(targets.get(trialIndex), 0.5f);
+        mouseDown = true;
+      }
+      textAlign(CENTER, CENTER);
+    }
   }
 
   //===========DRAW TARGET SQUARE=================
@@ -148,12 +164,16 @@ void DrawTransformationBoundary(Target t)
   PVector d4 = transform(dotDist, dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
   PVector center = new PVector(t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y);
   
-  mouseInArea = // mouse in rotating area
+  mouseOnDots = // mouse in rotating area
   dist(mouseX, mouseY, d1.x, d1.y) < dotSize/2f ||
   dist(mouseX, mouseY, d2.x, d2.y) < dotSize/2f ||
   dist(mouseX, mouseY, d3.x, d3.y) < dotSize/2f ||
   dist(mouseX, mouseY, d4.x, d4.y) < dotSize/2f;
-  if(mouseInArea) {
+  mouseOnMoveArea = !(
+  mouseX > width-inchesToPixels(.4f) &&
+  mouseY > height-inchesToPixels(.1f) &&
+  t.z > 200);
+  if(mouseOnDots) {
     fill(255,255,0);
     if(mousePressed){
       if(!inRotationAction) {
@@ -163,7 +183,7 @@ void DrawTransformationBoundary(Target t)
       }
     }
   }
-  else {
+  else if(mouseOnMoveArea){
     if(mousePressed) {
       if(!inMoveAction) {
         inMoveAction = true;
@@ -195,6 +215,12 @@ void DrawTransformationBoundary(Target t)
   ellipse(dotDist, -dotDist, dotSize, dotSize);
   ellipse(-dotDist, dotDist, dotSize, dotSize);
   ellipse(dotDist, dotDist, dotSize, dotSize);
+}
+
+void ScaleTarget(Target target, float scale) {
+  if(scale != 1 && scale > 0) {
+    target.z *= scale;
+  }
 }
 
 // Calculate the transformed vector
@@ -281,6 +307,7 @@ void mouseReleased()
   }
   
   // for transformation
+  mouseDown = false;
   if(inRotationAction) {
     inRotationAction = false;
     oldDirection.x = 0;
