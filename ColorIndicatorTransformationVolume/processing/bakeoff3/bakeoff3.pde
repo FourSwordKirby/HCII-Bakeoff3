@@ -30,7 +30,7 @@ boolean inMoveAction = false;
 boolean mouseOnDots = false;
 boolean mouseOnMoveArea = false;
 float additionalRotation = 0f;
-float newScale = 1f;
+float additionalSize = 0f;
 float oldMouseX = 0f;
 float oldMouseY = 0f;
 PVector additionalMove = new PVector();
@@ -100,8 +100,6 @@ void draw() {
 
   Target t = targets.get(trialIndex);
 
-  float scaledZ = t.z * newScale; //scaled square width
-
   translate(t.x, t.y); //center the drawing coordinates to the center of the screen
   translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
   translate(additionalMove.x, additionalMove.y);
@@ -110,19 +108,19 @@ void draw() {
 
   // apply the translations to the square for checking
   float oldZ = t.z;
-  t.z = scaledZ;
   t.rotation += additionalRotation;
   t.x += additionalMove.x;
   t.y += additionalMove.y;
+  t.z = max(t.z+additionalSize, 0f);
   
   colorSquare(Square.TARGET);
-  rect(0, 0, scaledZ, scaledZ);
+  rect(0, 0, t.z, t.z);
   
   // undo the translations
-  t.z = oldZ;
   t.rotation -= additionalRotation;
   t.x -= additionalMove.x;
   t.y -= additionalMove.y;
+  t.z = oldZ;
   
   //==========DRAW TRANSFORMATION BOUNDARY==========
   DrawTransformationBoundary(t);//draw scaled square instead
@@ -140,19 +138,19 @@ void draw() {
   //translate(screenTransX,screenTransY); //center the drawing coordinates to the center of the screen
 
   // apply the translations to the square for checking
-  t.z = scaledZ;
   t.rotation += additionalRotation;
   t.x += additionalMove.x;
   t.y += additionalMove.y;
+  t.z = max(t.z+additionalSize, 0f);
   
   colorSquare(Square.TARGETTING);
   rect(0, 0, screenZ, screenZ);
   
   // undo the translations
-  t.z = oldZ;
   t.rotation -= additionalRotation;
   t.x -= additionalMove.x;
   t.y -= additionalMove.y;
+  t.z = oldZ;
   
   // draw center cross
   DrawCenterCross(15);
@@ -182,8 +180,8 @@ void draw() {
 
 void DrawTransformationBoundary(Target t)
 {
-  float scaledZ = t.z * newScale;
-  float dotDist = scaledZ/2f+inchesToPixels(.2f);
+  float newZ = max(t.z + additionalSize, 0f);
+  float dotDist = newZ/2f+inchesToPixels(.2f);
   float dotSize = inchesToPixels(.15f);
   // 4 dots
   PVector d1 = transform(-dotDist, -dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
@@ -230,7 +228,7 @@ void DrawTransformationBoundary(Target t)
   if(inRotationAction) {
     PVector mpos = new PVector(mouseX - center.x, mouseY - center.y);
     additionalRotation = degrees(mpos.heading() - oldDirection.heading());
-    newScale = Math.max((mpos.mag() - oldDirection.mag()) / (t.z / (float)Math.pow(2, .5)) + 1f, 0f);
+    additionalSize = (mpos.mag() - oldDirection.mag()) * ((float)Math.pow(2, .5));
   }
   else if(inMoveAction){ // move
     additionalMove.x = mouseX - oldMouseX;
@@ -244,6 +242,9 @@ void DrawTransformationBoundary(Target t)
   line(-dotDist, dotDist, -dotDist, -dotDist);
   noStroke();*/
   
+  if(t.z == 0) {
+    println("Draw 4 dots!");
+  }
   ellipse(-dotDist, -dotDist, dotSize, dotSize);
   ellipse(dotDist, -dotDist, dotSize, dotSize);
   ellipse(-dotDist, dotDist, dotSize, dotSize);
@@ -398,9 +399,9 @@ void mouseReleased()
     oldDirection.x = 0;
     oldDirection.y = 0;
     targets.get(trialIndex).rotation += additionalRotation;
-    targets.get(trialIndex).z *= newScale;
+    targets.get(trialIndex).z = max(targets.get(trialIndex).z + additionalSize, 0f);
     additionalRotation = 0;
-    newScale = 1;
+    additionalSize = 0;
   }
   if(inMoveAction) {
     inMoveAction = false;
