@@ -230,7 +230,7 @@ void DrawTransformationBoundary(Target t)
   if(inRotationAction) {
     PVector mpos = new PVector(mouseX - center.x, mouseY - center.y);
     additionalRotation = degrees(mpos.heading() - oldDirection.heading());
-    newScale = mpos.mag() / oldDirection.mag();
+    newScale = Math.max((mpos.mag() - oldDirection.mag()) / (t.z / (float)Math.pow(2, .5)) + 1f, 0f);
   }
   else if(inMoveAction){ // move
     additionalMove.x = mouseX - oldMouseX;
