@@ -8,7 +8,7 @@ int index = 0;
 float screenTransX = 0;
 float screenTransY = 0;
 float screenRotation = 0;
-float screenZ = 100f;
+float screenZ = 200f;
 
 int trialCount = 20; //this will be set higher for the bakeoff
 float border = 0; //have some padding from the sides
@@ -127,7 +127,7 @@ void draw() {
   //==========DRAW TRANSFORMATION BOUNDARY==========
   DrawTransformationBoundary(t);//draw scaled square instead
   // draw center cross
-  DrawCenterCross(5);
+  DrawCenterCross(15);
 
   popMatrix();
 
@@ -155,19 +155,19 @@ void draw() {
   t.y -= additionalMove.y;
   
   // draw center cross
-  DrawCenterCross(5);
+  DrawCenterCross(15);
 
   popMatrix();
   
   // draw scale down button
   if(!userDone){
     fill(255);
-    if(!inRotationAction && !inMoveAction && targets.get(trialIndex).z > 200) {
+    if(!inRotationAction && !inMoveAction && targets.get(trialIndex).z > 2*screenZ) {
       textAlign(RIGHT, BOTTOM);
       text("Scale down", width, height);
       fill(255,100);
       rect(width-inchesToPixels(.4f), height-inchesToPixels(.1f), inchesToPixels(.8f), inchesToPixels(.2f));
-      if(!mouseDown && mousePressed && mouseX > width-inchesToPixels(.4f) && mouseY > height-inchesToPixels(.1f) && targets.get(trialIndex).z > 200) {
+      if(!mouseDown && mousePressed && mouseX > width-inchesToPixels(.8f) && mouseY > height-inchesToPixels(.2f)) {
         ScaleTarget(targets.get(trialIndex), 0.5f);
         mouseDown = true;
       }
@@ -192,18 +192,19 @@ void DrawTransformationBoundary(Target t)
   PVector d4 = transform(dotDist, dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
   PVector center = new PVector(t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y);
   
-  mouseOnDots = // mouse in rotating area
-  dist(mouseX, mouseY, d1.x, d1.y) < dotSize/2f ||
-  dist(mouseX, mouseY, d2.x, d2.y) < dotSize/2f ||
-  dist(mouseX, mouseY, d3.x, d3.y) < dotSize/2f ||
-  dist(mouseX, mouseY, d4.x, d4.y) < dotSize/2f;
-  mouseOnMoveArea = !(
-  mouseX > width-inchesToPixels(.4f) &&
-  mouseY > height-inchesToPixels(.1f) &&
-  t.z > 200);
+  boolean mouseOnScaleDownButton = (
+  mouseX > width-inchesToPixels(.8f) &&
+  mouseY > height-inchesToPixels(.2f) &&
+  t.z > 2*screenZ);
+  mouseOnDots = (// mouse in rotating area
+  dist(mouseX, mouseY, d1.x, d1.y) < dotSize ||
+  dist(mouseX, mouseY, d2.x, d2.y) < dotSize ||
+  dist(mouseX, mouseY, d3.x, d3.y) < dotSize ||
+  dist(mouseX, mouseY, d4.x, d4.y) < dotSize) && !mouseOnScaleDownButton;
+  mouseOnMoveArea = !mouseOnScaleDownButton;
   
   // dots color -- yellow when interacting, blue otherwise
-  if(mouseOnDots)
+  if(mouseOnDots && mousePressed)
     fill(255,255,0);
   else
     fill(100,100,255,128);
