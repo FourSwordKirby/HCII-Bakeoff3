@@ -22,8 +22,9 @@ final int screenPPI = 445; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 //Transformation params
-float padding = 10f;
-float dotRadius = 2f;
+float paddingInches = .4f;
+float dotRadiusInches = .25f;
+float dotAreaRatio = 2f;
 PVector oldDirection = new PVector();
 boolean inRotationAction = false;
 boolean inMoveAction = false;
@@ -125,7 +126,7 @@ void draw() {
   //==========DRAW TRANSFORMATION BOUNDARY==========
   DrawTransformationBoundary(t);//draw scaled square instead
   // draw center cross
-  DrawCenterCross(15);
+  DrawCenter(30);
 
   popMatrix();
 
@@ -153,7 +154,7 @@ void draw() {
   t.z = oldZ;
   
   // draw center cross
-  DrawCenterCross(15);
+  DrawCenter(30);
 
   popMatrix();
   
@@ -181,8 +182,8 @@ void draw() {
 void DrawTransformationBoundary(Target t)
 {
   float newZ = max(t.z + additionalSize, 0f);
-  float dotDist = newZ/2f+inchesToPixels(.2f);
-  float dotSize = inchesToPixels(.15f);
+  float dotDist = newZ/2f+inchesToPixels(paddingInches);
+  float dotSize = inchesToPixels(dotRadiusInches);
   // 4 dots
   PVector d1 = transform(-dotDist, -dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
   PVector d2 = transform(dotDist, -dotDist, t.x+screenTransX+width/2+additionalMove.x, t.y+screenTransY+height/2+additionalMove.y, t.rotation);
@@ -195,10 +196,10 @@ void DrawTransformationBoundary(Target t)
   mouseY > height-inchesToPixels(.2f) &&
   t.z > 2*screenZ);
   mouseOnDots = (// mouse in rotating area
-  dist(mouseX, mouseY, d1.x, d1.y) < dotSize ||
-  dist(mouseX, mouseY, d2.x, d2.y) < dotSize ||
-  dist(mouseX, mouseY, d3.x, d3.y) < dotSize ||
-  dist(mouseX, mouseY, d4.x, d4.y) < dotSize) && !mouseOnScaleDownButton;
+  dist(mouseX, mouseY, d1.x, d1.y) < dotSize * dotAreaRatio ||
+  dist(mouseX, mouseY, d2.x, d2.y) < dotSize * dotAreaRatio ||
+  dist(mouseX, mouseY, d3.x, d3.y) < dotSize * dotAreaRatio ||
+  dist(mouseX, mouseY, d4.x, d4.y) < dotSize * dotAreaRatio) && !mouseOnScaleDownButton;
   mouseOnMoveArea = !mouseOnScaleDownButton;
   
   // dots color -- yellow when interacting, blue otherwise
@@ -267,11 +268,11 @@ PVector transform(float ox, float oy, float x, float y, float d)
   return v;
 }
 
-void DrawCenterCross(float size)
+void DrawCenter(float size)
 {
-  stroke(255);
-  line(-size, 0, size, 0);
-  line(0, -size, 0, size);
+  stroke(255,128);
+  noFill();
+  ellipse(0, 0, size, size);
   noStroke();
 }
 
