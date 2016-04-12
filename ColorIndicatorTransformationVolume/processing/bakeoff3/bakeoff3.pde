@@ -22,9 +22,9 @@ final int screenPPI = 445; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 //Transformation params
-float paddingInches = .4f;
-float dotRadiusInches = .25f;
-float dotAreaRatio = 2f;
+float paddingInches = .35f;
+float dotRadiusInches = .2f;
+float dotAreaRatio = 1.5f;
 PVector oldDirection = new PVector();
 boolean inRotationAction = false;
 boolean inMoveAction = false;
@@ -270,7 +270,7 @@ PVector transform(float ox, float oy, float x, float y, float d)
 
 void DrawCenter(float size)
 {
-  stroke(255,128);
+  stroke(255);
   noFill();
   ellipse(0, 0, size, size);
   noStroke();
@@ -348,7 +348,7 @@ void keyPressed() {
   } 
   
   //Comment out this part when not using the android)
-  if ( (key == CODED) && (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN) && checkForSuccess()) {
+  if ( (key == CODED) && (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) && checkForSuccess()) {
     nextTrial();
     keyCode = 1;
   }
